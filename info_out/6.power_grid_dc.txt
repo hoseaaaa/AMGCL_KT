@@ -1,0 +1,38 @@
+20231010-164133
+Matrix C/home/yhz/amgcl/amgcl_data/ibmpg3t_12456_no_Vgnd/CSC_C.txt: 1041534x1041534
+Matrix G/home/yhz/amgcl/amgcl_data/ibmpg3t_12456_no_Vgnd/CSC_G.txt: 1041534x1041534
+Matrix B/home/yhz/amgcl/amgcl_data/ibmpg3t_12456_no_Vgnd/CSC_B.txt: 1041534x970
+Solver
+======
+Type:             BiCGStab(4)
+Unknowns:         1041534
+Memory footprint: 111.25 M
+
+Preconditioner
+==============
+Number of levels:    4
+Operator complexity: 1.48
+Grid complexity:     1.31
+Memory footprint:    310.26 M
+
+level     unknowns       nonzeros      memory
+---------------------------------------------
+0    1041534      4224056        204.78 M     (67.79%)
+1    283928       1504940        80.95 M      (24.15%)
+2    40022        458910         19.20 M      (7.37 %)
+3    2987         42991          5.33 M       (0.69 %)
+
+0	3.856885e+05
+20	4.150252e+02
+40	3.176910e+00
+60	2.903759e-03
+Iters: 68
+Error: 0.00133889
+
+[Ax=b:       25.943     s] (100.00%)
+[  calculate:0.119      s] (0.46  %)
+[  read:     2.284      s] (8.80  %)
+[  setup:    12.052     s] (46.46 %)
+[  solve:    11.475     s] (44.23 %)
+
+
