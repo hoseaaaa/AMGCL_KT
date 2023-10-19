@@ -2,7 +2,6 @@ build*
 .*.swp
 RELEASE-VERSION
 dist
-tmp
 pyamgcl.egg-info
 __pycache__
 /debug/
@@ -11,5 +10,4 @@ __pycache__
 .pydevproject
 .sync.ffs_db
 *.bundle
-/amgcl_data
 /tmp

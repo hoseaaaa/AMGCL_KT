@@ -1,6 +1,6 @@
-20231010-161312
-Matrix /home/yhz/amgcl/amgcl_data/poisson3Db/poisson3Db.mtx: 85623x85623
-RHS /home/yhz/amgcl/amgcl_data/poisson3Db/poisson3Db_b.mtx: 85623x1
+20231019-022819
+Matrix /home/yhz/AMGCL_KT/amgcl_data/poisson3Db/poisson3Db.mtx: 85623x85623
+RHS /home/yhz/AMGCL_KT/amgcl_data/poisson3Db/poisson3Db_b.mtx: 85623x1
 Solver
 ======
 Type:             BiCGStab
@@ -23,9 +23,9 @@ level     unknowns       nonzeros      memory
 Iters: 24
 Error: 8.33789e-09
 
-[poisson3Db:     2.752 s] (100.00%)
-[  read:         1.903 s] ( 69.16%)
-[  setup:        0.173 s] (  6.27%)
-[  solve:        0.676 s] ( 24.56%)
+[poisson3Db:     1.501 s] (100.00%)
+[  read:         0.907 s] ( 60.40%)
+[  setup:        0.065 s] (  4.35%)
+[  solve:        0.529 s] ( 35.23%)
 
 

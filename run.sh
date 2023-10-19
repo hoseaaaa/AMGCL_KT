@@ -2,7 +2,7 @@
 set -e
 time=$(date "+%Y%m%d-%H%M%S")
 
-HOME_PATH=/home/yhz/amgcl
+HOME_PATH=/home/yhz/AMGCL_KT
 DATA_PATH=$HOME_PATH/amgcl_data
 INFO_OUT=$HOME_PATH/info_out
 POISSON3DB=$DATA_PATH/poisson3Db
