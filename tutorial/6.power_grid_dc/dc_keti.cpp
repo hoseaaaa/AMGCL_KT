@@ -1,5 +1,3 @@
-// #define BLOCK_MATRIX
-// 
 #define DEBUG
 
 #ifdef DEBUG
@@ -51,6 +49,8 @@
 #include <amgcl/solver/bicgstabl.hpp>
 #include <amgcl/solver/lgmres.hpp>
 
+#include <amgcl/relaxation/spai0.hpp>
+#include <amgcl/relaxation/gauss_seidel.hpp>
 
 #ifdef  BLOCK_MATRIX
 #include <amgcl/value_type/static_matrix.hpp>
@@ -69,7 +69,11 @@
 
 
 #include <amgcl/relaxation/as_preconditioner.hpp>
+#include <amgcl/coarsening/ruge_stuben.hpp>
+#include <amgcl/relaxation/chebyshev.hpp>
 
+
+#include <amgcl/solver/richardson.hpp>
 
 using namespace std ; 
 
@@ -100,10 +104,10 @@ void line2data(string s ,vector<ptrdiff_t> &a){
 	}
 }
 template <class I, class T>
-void read_c_g_b( vector < I>& cout_point,
-                   vector < I>& A_ptr,
-                   vector < I>& A_col,
-                   vector < T>& A_val,
+void read_c_g_b(   vector <I>& cout_point,
+                   vector <I>& A_ptr,
+                   vector <I>& A_col,
+                   vector <T>& A_val,
                    string filename
                  ) {
 	ifstream infile;
@@ -117,7 +121,7 @@ void read_c_g_b( vector < I>& cout_point,
     if (getline(infile, s) ){
         line2data(s,cout_point);
     }
-
+    cout << "------s-----"  << s <<endl; 
     //1、
     if (getline(infile, s) ){
         istringstream is(s);
@@ -148,6 +152,9 @@ void read_c_g_b( vector < I>& cout_point,
          ( A_col.size()  != cout_point[2] ) && 
          ( A_val.size()  != cout_point[2] )  
         ){
+            cout << " A_ptr.size : " <<  A_ptr.size()   << "cout_point[0]:  " << cout_point[0] << endl ;
+            cout << " A_col.size : " <<  A_col.size()   << "cout_point[2]:  " << cout_point[2] << endl ;
+            cout << " A_val.size : " <<  A_val.size()   << "cout_point[2]:  " << cout_point[2] << endl ;
             cout <<"error read file " << filename  <<" matrix size not right  "<<endl ;   //若失败,则输出错误消息,并终止程序运行 
             exit(1) ;
         }
@@ -244,94 +251,39 @@ void read_u_t(     vector < I>& cout_point,
 } 
 
 int main(int argc ,char** argv) {    
-
-    if (argc < 4) {
-        std::cerr << "Usage: " << argv[0] << " <matrix_C.mtx> <matrix_G.mtx> <matrix_B.mtx> <matrix_U.mtx> " << std::endl;
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0] << " <matrix_G.mtx> <matrix_Ut.mtx> " << std::endl;
+        //argv[1]   <matrix_G.mtx>
+        //argv[2]   <matrix_Ut.mtx>
         return 1;
     }
-    // The profiler:
     
     double  H_step = 2.5e-11;
-
     amgcl::profiler<> prof("Ax=b");   
     cout.setf(std::ios::left);
-    // Read the system matrix and the RHS:  csr
-    ptrdiff_t rows_C, cols_C ,nnz_C;
-    std::vector<ptrdiff_t> ptr_C, col_C ; 
-    std::vector<double> val_C ;
 
     ptrdiff_t rows_G, cols_G ,nnz_G;
     std::vector<ptrdiff_t> ptr_G,col_G ; 
     std::vector<double> val_G ;
 
-
-    ptrdiff_t rows_B, cols_B , nnz_B;
-    std::vector<ptrdiff_t> ptr_B, col_B ; 
-    std::vector<double> val_B ;
-
     ptrdiff_t cols_U,rows_U;
     std::vector<ptrdiff_t> ptr_U,col_U ; 
     std::vector<double> val_U  ;
-
     vector<ptrdiff_t>   cout_point ; 
 
     prof.tic("read");
-    //read C_G
-    read_c_g_b<ptrdiff_t,double> (cout_point,ptr_C,col_C,val_C,argv[1]) ; 
-    rows_C = cout_point[0] ;    cols_C = cout_point[1] ;    nnz_C = cout_point[2] ;
-    cout_point.clear() ;
 
-    read_c_g_b<ptrdiff_t ,double> (cout_point,ptr_G,col_G,val_G,argv[2]) ; 
+    read_c_g_b<ptrdiff_t ,double> (cout_point,ptr_G,col_G,val_G,argv[1]) ; 
     rows_G = cout_point[0] ;    cols_G = cout_point[1] ;    nnz_G = cout_point[2] ;
     cout_point.clear() ;
-
-    //read b
-    read_c_g_b<ptrdiff_t ,double> (cout_point,ptr_B,col_B,val_B,argv[3]) ; 
-    rows_B = cout_point[0] ;    cols_B = cout_point[1] ;    nnz_B = cout_point[2] ;
-    cout_point.clear() ;
-
-    vector<ptrdiff_t >B_ptr_temp (rows_B+1); 
-    vector<ptrdiff_t >B_col_temp(nnz_B); 
-    vector<double> B_val_temp(nnz_B) ;
-
-    csc_tocsr<ptrdiff_t ,double>( cols_B  , rows_B  , 
-                                 ptr_B , col_B , val_B,
-                                 B_ptr_temp , B_col_temp , B_val_temp  ) ;
-    ptr_B.swap(B_ptr_temp)  ;
-    col_B.swap(B_col_temp)  ;
-    val_B.swap(B_val_temp)  ;
-
 #ifdef DEBUG
-    //print C 
-    std::cout << "Matrix C" << argv[1] << ": " << rows_C << "x" << cols_C << std::endl;
-    //print G
-    std::cout << "Matrix G" << argv[2] << ": " << rows_G << "x" << cols_G << std::endl;
-
-    //print B
-    std::cout << "Matrix B" << argv[3] << ": " << rows_B << "x" << cols_B << std::endl;
-
-    //print u
-    // std::cout << " u  " << argv[4] << ": " << rows_U << "x" << cols_U << std::endl; 
+    std::cout << "Matrix G" << argv[1] << ": " << rows_G << "x" << cols_G << std::endl;
 #endif
-
     prof.toc("read");
-    
-    //calculate
     prof.tic("calculate");
-
-    auto C = std::tie(rows_C, ptr_C, col_C, val_C);
-    auto G = std::tie(rows_C, ptr_G, col_G, val_G);
-
-    // C sparse matrix +  C sparse matrix  C/h + G
-    auto sum_A = amgcl::backend::sum<double ,ptrdiff_t,ptrdiff_t>(1.0, C , H_step /2 , G ,true);  // may be change 
-
-    auto sum_X_B = amgcl::backend::sum<double ,ptrdiff_t,ptrdiff_t>(1.0, C , -H_step /2 , G ,true);  // may be change 
-
-    // C sparse matrix  * rhs dense   B * u 
-    auto B = std::tie(rows_B, ptr_B, col_B, val_B);
-
+    auto G = std::tie(rows_G, ptr_G, col_G, val_G);
+    auto sum_A  = G ;
     prof.toc("calculate");
-
 //////////////////////
 //     //solver
 
@@ -342,119 +294,61 @@ int main(int argc ,char** argv) {
         amgcl::amg<
             PBackend,
             amgcl::coarsening::smoothed_aggregation,
-            amgcl::relaxation::spai1
+            amgcl::relaxation::gauss_seidel
             >,
-        amgcl::solver::bicgstabl<SBackend>
+        amgcl::solver::richardson<SBackend>
         > Solver;
+
+    // typedef amgcl::make_solver<
+    //     amgcl::amg<
+    //         PBackend,
+    //         amgcl::coarsening::smoothed_aggregation,
+    //         amgcl::relaxation::spai0
+    //         >,
+    //     amgcl::solver::bicgstab<SBackend>
+    //     > Solver;
 
     Solver::params prm;
 
-    prm.solver.L = 4 ;
-    prm.solver.tol = 2.5e-3 ;
-    prm.solver.maxiter = 1000 ;
+    // prm.solver.L = 4 ;
+    // prm.solver.tol = 2.5e-3 ;
+    // prm.solver.maxiter = 1000 ;
+    // prm.solver.verbose = true ;
+    // prm.precond.direct_coarse  = true ; 
+    // prm.precond.coarsening.relax = 1.5f ;
+    // prm.precond.coarsening.power_iters = 1000 ; 
+    // prm.precond.coarsening.aggr.eps_strong = 0.0020 ;
+    // prm.precond.coarsening.estimate_spectral_radius = true ;
+    // prm.precond.max_levels = 10;
+    cout << "---------------flag2------" <<endl ; 
+    auto A = sum_A;
+    cout << "---------------flag3------" <<endl ; 
 
-    // prm.solver.s = 2 ;
-    // prm.solver.smoothing =true ;
-#ifdef  DEBUG
-    prm.solver.verbose = true ;
-#endif
-    prm.precond.direct_coarse  = true ; 
-    prm.precond.coarsening.relax = 1.5f ;
-    prm.precond.coarsening.power_iters = 1000 ; 
-    prm.precond.coarsening.aggr.eps_strong = 0.0020 ;
-    prm.precond.coarsening.estimate_spectral_radius = true ;
-
-    // prm.precond.npre = 1 ;
-    prm.precond.max_levels = 10;
-
-    // may be need 
-    // The -s option tells the solver to do that:
-    
-    vector<ptrdiff_t>  A_PTR (sum_A->ptr,sum_A->ptr+rows_C+1); 
-    vector<ptrdiff_t>  A_COL (sum_A->col,sum_A->col + sum_A->ptr[rows_C] ) ; 
-    vector<double>     A_VAL (sum_A->val,sum_A->val + sum_A->ptr[rows_C] ) ; 
-    auto A = std::tie(rows_C,A_PTR ,A_COL ,A_VAL )  ;
-
-    // Initialize the solver with the system matrix:
     prof.tic("setup");
-
     Solver solve(A,prm);
+    cout << "---------------flag4------" <<endl ; 
 
 #ifdef DEBUG
         std::cout << solve  <<  std::endl;
 #endif
     int iters;
     double error;
-    // Show the mini-report on the constructed solver:
-    // 设置阶段完成 。。尝试修改b
-
-
-#ifndef DEBUG
-
-#endif
     prof.toc("setup");
 
-    std::vector<double> x(rows_C,0.0); 
+    std::vector<double> x(rows_G,0.0); 
     prof.tic("solve");
     ofstream outfile;
-    outfile.open(argv[5]) ;
-    for (auto i = 0 ;i < SIM ;i++ ){
+    outfile.open(argv[3]) ;
 
-        read_u_t<ptrdiff_t,double>(cout_point,val_U,i,i+1,argv[4]) ;  // read u0 
-        rows_U = cout_point[0] ;    cols_U = cout_point[1];
+    read_u_t<ptrdiff_t,double>(cout_point,val_U,0,1,argv[2]) ;  // read u0 
+    rows_U = cout_point[0] ;    cols_U = cout_point[1];
 
-        // sum_X_B * x(t)
-        std::vector<double> new_val_C_x(rows_B);
-        amgcl::backend::spmv( 1.0 , *sum_X_B , x, 0.0 , new_val_C_x);
-
-        // B *u (t) + sum_X_B* x(t)
-
-        amgcl::backend::spmv(  H_step/2, B , val_U , 1.0 , new_val_C_x);
-
-        val_U.swap( new_val_C_x) ;
-
-        // vector add vector 
-        x.clear() ;
-        std::tie(iters, error) = solve(A,val_U, x);
-
-        // std::tuple<ptrdiff_t &, std::vector<ptrdiff_t> &, std::vector<ptrdiff_t> &, std::vector<double> &> C
-        // Output the number of iterations, the relative error,
-        // and the profiling data:
-
-#ifndef DEBUG
-       	if (!outfile.is_open()){
-            cout <<"error  open file outx_data.txt"<<endl ;   //若失败,则输出错误消息,并终止程序运行 
-            exit(1) ;
-        }
-        vector <ptrdiff_t> cout_sta ( cout_point.begin()+2,cout_point.end() ) ;
-        if (i == 0 ) {
-            outfile << "Time index:     \t"  <<setw(20); 
-            for (auto cout_i = cout_sta.begin() ; cout_i<cout_sta.end() ; cout_i++){
-                outfile << *cout_i <<setw(20);
-            }
-            outfile << endl ;
-            for (auto i = 0 ;i <=cout_sta.size() ; i++ ){
-                 outfile << "0.0 " <<setw(20) ; 
-            }
-            outfile << endl ;
-        }
-        outfile <<  2.5e-11 * (i+1) << setw(20); 
-        for (auto i_cout = 0 ; i_cout< cout_sta.size() ; i_cout++ ){
-            outfile <<   ( x [ cout_sta.at(i_cout) ]  ) <<setw(20);
-        }
-        outfile <<endl ;
-        cout_sta.clear() ;
-#endif
-        val_U.clear() ;
-        cout_point.clear() ;
-    }
-        outfile.close() ;
-        prof.toc("solve");
-
+    // vector add vector 
+    std::tie(iters, error) = solve(A,val_U, x);
+    prof.toc("solve");
         std::cout << "Iters: " << iters << std::endl
-             << "Error: " << error << std::endl ;
-
-
+            << "Error: " << error << std::endl ;
+             
     std::cout << prof << std::endl;
     return 0 ;
 }
