@@ -23,7 +23,6 @@
 #include <amgcl/adapter/crs_tuple.hpp>
 #include <amgcl/make_solver.hpp>
 #include <amgcl/amg.hpp>
-#include <amgcl/coarsening/smoothed_aggregation.hpp>
 #include <amgcl/relaxation/spai1.hpp>
 
 #include <amgcl/solver/bicgstab.hpp>
@@ -67,14 +66,18 @@
 
 #include<tuple>
 
+#include <amgcl/coarsening/smoothed_aggregation.hpp>
+#include <amgcl/coarsening/smoothed_aggr_emin.hpp>
+#include <amgcl/coarsening/pointwise_aggregates.hpp>
+#include <amgcl/coarsening/ruge_stuben.hpp>
+#include  <amgcl/coarsening/as_scalar.hpp>
 
 #include <amgcl/relaxation/as_preconditioner.hpp>
-#include <amgcl/coarsening/ruge_stuben.hpp>
 #include <amgcl/relaxation/chebyshev.hpp>
+#include <amgcl/relaxation/detail/ilu_solve.hpp>
 
 
 #include <amgcl/solver/richardson.hpp>
-
 using namespace std ; 
 
 void line2data(string s ,vector<ptrdiff_t> &a){
@@ -296,7 +299,7 @@ int main(int argc ,char** argv) {
             amgcl::coarsening::smoothed_aggregation,
             amgcl::relaxation::gauss_seidel
             >,
-        amgcl::solver::richardson<SBackend>
+        amgcl::solver::bicgstab<SBackend>
         > Solver;
 
     // typedef amgcl::make_solver<
@@ -309,12 +312,11 @@ int main(int argc ,char** argv) {
     //     > Solver;
 
     Solver::params prm;
-
     // prm.solver.L = 4 ;
     // prm.solver.tol = 2.5e-3 ;
     // prm.solver.maxiter = 1000 ;
     // prm.solver.verbose = true ;
-    // prm.precond.direct_coarse  = true ; 
+    prm.precond.direct_coarse  = true ; 
     // prm.precond.coarsening.relax = 1.5f ;
     // prm.precond.coarsening.power_iters = 1000 ; 
     // prm.precond.coarsening.aggr.eps_strong = 0.0020 ;
@@ -338,9 +340,8 @@ int main(int argc ,char** argv) {
     std::vector<double> x(rows_G,0.0); 
     prof.tic("solve");
     ofstream outfile;
-    outfile.open(argv[3]) ;
 
-    read_u_t<ptrdiff_t,double>(cout_point,val_U,0,1,argv[2]) ;  // read u0 
+    read_u_t<ptrdiff_t,double>(cout_point, val_U, 0, 1, argv[2]) ;  // read u0 
     rows_U = cout_point[0] ;    cols_U = cout_point[1];
 
     // vector add vector 
@@ -350,5 +351,12 @@ int main(int argc ,char** argv) {
             << "Error: " << error << std::endl ;
              
     std::cout << prof << std::endl;
+
+    outfile.open(argv[3]) ;
+    for (int i=0 ; i<rows_U;i++ ) {
+        outfile << x[i] <<endl ; 
+    }
+    outfile.close() ;
+
     return 0 ;
 }
