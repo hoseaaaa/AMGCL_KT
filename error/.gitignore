@@ -1,0 +1,5 @@
+# 忽略文件夹中的所有文件，但不忽略文件夹本身
+*
+!.gitignore
+!error.sh
+!read_error.cpp
