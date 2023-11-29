@@ -18,16 +18,17 @@ POISSON3DB=$DATA_PATH/poisson3Db
 TARGET_PATH=$HOME_PATH/build
 
 prefix=$(echo "$2" | cut -c1-5)
+echo $prefix
 data_G=$DATA_PATH/$2/$prefix.G.txt
 data_U=$DATA_PATH/$2/$prefix.u.txt
-data_outx=$DATA_PATH/$2/$prefix.txt
+data_outx=$DATA_PATH/$2/$prefix.AMG_x.txt
 
 
 
 case "$1" in
     "make")
         echo "Running makefile make a..."
-        cd "$TARGET_PATH/tutorial/1.poisson3Db"
+        cd "$TARGET_PATH/tutorial/6.power_grid_dc"
         make -j8
     ;;
     "poisson3Db")
@@ -37,10 +38,10 @@ case "$1" in
         ./poisson3Db "${POISSON3DB}/poisson3Db.mtx" "${POISSON3DB}/poisson3Db_b.mtx" >> "${INFO_OUT}/1.POISSON3DBinfo.txt"
     ;;
     "dc_keti")
-        echo "Running $1... $2 // $3 "
+        echo "Running $1... $2 // "
         cd "$TARGET_PATH/tutorial/6.power_grid_dc"
         echo "$time" > "${INFO_OUT}/00.$2.info"
-        ./dc_keti  $data_G  $data_U $data_outx >> "${INFO_OUT}/6.$2.info"
+        ./dc_keti  $data_G  $data_U $data_outx >> "${INFO_OUT}/00.$2.info"
     ;;
     "amgcl")
         echo "Running AMGCL..."
@@ -72,6 +73,10 @@ case "$1" in
                 ./dc_keti  $HOME_PATH/amgcl_data/thupg8/thupg.G.txt  $HOME_PATH/amgcl_data/thupg8/thupg.u.txt $HOME_PATH/amgcl_data/thupg8/data_outx.txt > "${INFO_OUT}/t8.thupg.info" || true
             ;;
         esac
+    ;;
+    "error")  
+        cd "$HOME_PATH/error"
+        ./error.sh
     ;;
     "clean")
         rm -rf  $HOME_PATH/info_out/*.info

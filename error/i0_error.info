@@ -1,0 +1,28 @@
+ibmpg1 : 
+
+avg_error_value 0.000419142
+max_error_value 0.00198
+
+ibmpg2 : 
+
+avg_error_value -0.00183127
+max_error_value 5.2e-05
+
+ibmpg3 : 
+
+avg_error_value -nan
+ibmpg4 : 
+
+avg_error_value -0.00157111
+max_error_value 0.00032
+
+ibmpg5 : 
+
+avg_error_value -0.00878045
+max_error_value 9.71e-05
+
+ibmpg6 : 
+
+avg_error_value -0.00360018
+max_error_value 0.01239
+

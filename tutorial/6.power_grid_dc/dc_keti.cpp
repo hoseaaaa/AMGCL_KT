@@ -25,6 +25,8 @@
 #include <amgcl/amg.hpp>
 #include <amgcl/relaxation/spai1.hpp>
 
+#include <amgcl/relaxation/ilut.hpp>
+
 #include <amgcl/solver/bicgstab.hpp>
 #include <amgcl/solver/idrs.hpp>
 
@@ -231,19 +233,19 @@ void read_u_t(     vector < I>& cout_point,
 	string s;
     getline(u_t_file, s) ;  // matrix size
     line2data(s,cout_point) ;
-    getline(u_t_file, s) ;  // drop  time step  
+    // getline(u_t_file, s) ;  // drop  time step  
 
 	while (getline(u_t_file, s)) {
 		istringstream is(s); //将读出的一行转成数据流进行操作
-		T d;
+		T data;
 		while (!is.eof()) {
                 int pam = 0 ; 
-			    while (is >> d){
+			    while (is >> data){
                     if ( pam == cols_0 ){
-                        A_val.push_back(d);
+                        A_val.push_back(data);
                     }
                     if ( pam == cols_1){
-                        A_val.at(A_val.size()-1) += d ;
+                        A_val.at(A_val.size()-1) += data ;
                     }
                     pam++ ;
                 }    
@@ -290,16 +292,16 @@ int main(int argc ,char** argv) {
 //////////////////////
 //     //solver
 
-    typedef amgcl::backend::builtin<double> SBackend;
+    typedef amgcl::backend::builtin<float> SBackend;
     typedef amgcl::backend::builtin<double> PBackend;
 
     typedef amgcl::make_solver<
         amgcl::amg<
             PBackend,
-            amgcl::coarsening::smoothed_aggregation,
+            amgcl::coarsening::ruge_stuben,
             amgcl::relaxation::gauss_seidel
             >,
-        amgcl::solver::bicgstab<SBackend>
+        amgcl::solver::cg<SBackend>
         > Solver;
 
     // typedef amgcl::make_solver<
@@ -312,13 +314,15 @@ int main(int argc ,char** argv) {
     //     > Solver;
 
     Solver::params prm;
-    // prm.solver.L = 4 ;
-    // prm.solver.tol = 2.5e-3 ;
+    // prm.solver.abstol  = 2.5e-4 ;
+    // prm.solver.ns_search  = true ; 
+    
+    // prm.precond.relax.damping = 0.9 ;
     // prm.solver.maxiter = 1000 ;
     // prm.solver.verbose = true ;
-    prm.precond.direct_coarse  = true ; 
-    // prm.precond.coarsening.relax = 1.5f ;
-    // prm.precond.coarsening.power_iters = 1000 ; 
+    // prm.precond.direct_coarse  = true ; 
+    // prm.precond.coarsening.relax = 0.75f ;
+    // prm.precond.coarsening.power_iters = 1 ; 
     // prm.precond.coarsening.aggr.eps_strong = 0.0020 ;
     // prm.precond.coarsening.estimate_spectral_radius = true ;
     // prm.precond.max_levels = 10;
