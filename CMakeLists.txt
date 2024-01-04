@@ -74,6 +74,21 @@ endif ()
 #----------------------------------------------------------------------------
 # Common compile options and definitions
 #----------------------------------------------------------------------------
+
+if (DEFINED EPS_STRONG)
+    message(STATUS "EPS_STRONG is defined: ${EPS_STRONG}")
+else()
+    set(EPS_STRONG 1.0)  # 设置默认值
+    message(STATUS "EPS_STRONG is not defined, using default value: ${EPS_STRONG}")
+endif()
+
+if (DEFINED RELAX)
+    message(STATUS "RELAX is defined: ${RELAX}")
+else()
+    set(RELAX 0.08)  # 设置默认值
+    message(STATUS "RELAX is not defined, using default value: ${RELAX}")
+endif()
+
 target_compile_options(amgcl INTERFACE
     # Compiler is GNU (g++):
     $<$<CXX_COMPILER_ID:GNU>:$<BUILD_INTERFACE:-Wall;-Wextra;-Wpedantic;-DEPS_STRONG=${EPS_STRONG} -DRELAX=${RELAX}>>
@@ -322,16 +337,3 @@ if (AMGCL_MASTER_PROJECT)
 endif()
 
 
-# if (DEFINED EPS_STRONG)
-#     message(STATUS "EPS_STRONG is defined: ${EPS_STRONG}")
-# else()
-#     set(EPS_STRONG 1.0)  # 设置默认值
-#     message(STATUS "EPS_STRONG is not defined, using default value: ${EPS_STRONG}")
-# endif()
-
-# if (DEFINED RELAX)
-#     message(STATUS "RELAX is defined: ${RELAX}")
-# else()
-#     set(RELAX 0.08)  # 设置默认值
-#     message(STATUS "RELAX is not defined, using default value: ${RELAX}")
-# endif()

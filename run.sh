@@ -46,7 +46,11 @@ case "$1" in
     "amgcl")
         echo "Running AMGCL..."
         rm -rf build/
-        cmake -Bbuild -DAMGCL_BUILD_TESTS=ON -DAMGCL_BUILD_EXAMPLES=ON  -DEPS_STRONG=2.5 -DRELAX=0.15 .
+        if [ -z "$2"]; then 
+            cmake -Bbuild -DAMGCL_BUILD_TESTS=ON -DAMGCL_BUILD_EXAMPLES=ON .
+        else
+            cmake -Bbuild -DAMGCL_BUILD_TESTS=ON -DAMGCL_BUILD_EXAMPLES=ON  -DEPS_STRONG=$2 -DRELAX=$3 .
+        fi
     ;;
     "all")
         echo "Running $1.$2.all ."
