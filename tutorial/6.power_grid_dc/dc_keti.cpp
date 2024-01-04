@@ -5,6 +5,15 @@
 #else
 #define SIM 400
 #endif
+
+#ifndef EPS_STRONG
+#define EPS_STRONG 1.0
+#endif
+
+#ifndef RELAX
+#define RELAX 0.08
+#endif
+
 // #define SCALE_DIAGONAL
 
 #include <vector>
@@ -298,12 +307,22 @@ int main(int argc ,char** argv) {
     typedef amgcl::make_solver<
         amgcl::amg<
             PBackend,
-            amgcl::coarsening::ruge_stuben,
+            amgcl::coarsening::smoothed_aggregation,
             amgcl::relaxation::gauss_seidel
             >,
         amgcl::solver::cg<SBackend>
         > Solver;
-
+    // typedef amgcl::make_solver<
+    //     amgcl::make_solver<
+    //         amgcl::amg<
+    //             PBackend,
+    //             amgcl::coarsening::smoothed_aggregation,
+    //             amgcl::relaxation::damped_jacobi
+    //             >,
+    //         amgcl::solver::cg<SBackend>
+    //         >,
+    //     amgcl::solver::cg<SBackend>
+    //     > Solver;
     // typedef amgcl::make_solver<
     //     amgcl::amg<
     //         PBackend,
@@ -314,16 +333,17 @@ int main(int argc ,char** argv) {
     //     > Solver;
 
     Solver::params prm;
-    // prm.solver.abstol  = 2.5e-4 ;
+    // prm.solver.tol  = 1e-6 ;
+    // prm.solver.maxiter = 500 ;
+    // prm.precond.coarsening.eps_strong = 0.485435426235199 ;
+
     // prm.solver.ns_search  = true ; 
-    
     // prm.precond.relax.damping = 0.9 ;
-    // prm.solver.maxiter = 1000 ;
     // prm.solver.verbose = true ;
     // prm.precond.direct_coarse  = true ; 
-    // prm.precond.coarsening.relax = 0.75f ;
+    prm.precond.coarsening.aggr.eps_strong = EPS_STRONG ;
+    prm.precond.coarsening.relax = RELAX ;
     // prm.precond.coarsening.power_iters = 1 ; 
-    // prm.precond.coarsening.aggr.eps_strong = 0.0020 ;
     // prm.precond.coarsening.estimate_spectral_radius = true ;
     // prm.precond.max_levels = 10;
     cout << "---------------flag2------" <<endl ; 
@@ -333,7 +353,9 @@ int main(int argc ,char** argv) {
     prof.tic("setup");
     Solver solve(A,prm);
     cout << "---------------flag4------" <<endl ; 
-
+    cout << "coarsening.relax : " <<prm.precond.coarsening.relax <<endl ;
+    cout << "aggr.eps_strong  : " <<prm.precond.coarsening.aggr.eps_strong <<endl ;
+    
 #ifdef DEBUG
         std::cout << solve  <<  std::endl;
 #endif

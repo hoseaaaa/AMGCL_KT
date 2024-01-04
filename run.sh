@@ -29,7 +29,7 @@ case "$1" in
     "make")
         echo "Running makefile make a..."
         cd "$TARGET_PATH/tutorial/6.power_grid_dc"
-        make -j8
+        make -j8 
     ;;
     "poisson3Db")
         echo "Running poisson3Db..."
@@ -46,7 +46,7 @@ case "$1" in
     "amgcl")
         echo "Running AMGCL..."
         rm -rf build/
-        cmake -Bbuild -DAMGCL_BUILD_TESTS=ON -DAMGCL_BUILD_EXAMPLES=ON .
+        cmake -Bbuild -DAMGCL_BUILD_TESTS=ON -DAMGCL_BUILD_EXAMPLES=ON  -DEPS_STRONG=2.5 -DRELAX=0.15 .
     ;;
     "all")
         echo "Running $1.$2.all ."
