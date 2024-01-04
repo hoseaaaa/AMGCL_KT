@@ -40,8 +40,8 @@ case "$1" in
     "dc_keti")
         echo "Running $1... $2 // "
         cd "$TARGET_PATH/tutorial/6.power_grid_dc"
-        echo "$time" > "${INFO_OUT}/00.$2.info"
-        ./dc_keti  $data_G  $data_U $data_outx >> "${INFO_OUT}/00.$2.info"
+        echo "$time" > "${INFO_OUT}/00.$2.txt"
+        ./dc_keti  $data_G  $data_U $data_outx >> "${INFO_OUT}/00.$2.txt"
     ;;
     "amgcl")
         echo "Running AMGCL..."
@@ -67,10 +67,10 @@ case "$1" in
                 ./dc_keti  $HOME_PATH/amgcl_data/thupg2/thupg.G.txt  $HOME_PATH/amgcl_data/thupg2/thupg.u.txt $HOME_PATH/amgcl_data/thupg2/data_outx.txt > "${INFO_OUT}/t2.thupg.info" || true
                 ./dc_keti  $HOME_PATH/amgcl_data/thupg3/thupg.G.txt  $HOME_PATH/amgcl_data/thupg3/thupg.u.txt $HOME_PATH/amgcl_data/thupg3/data_outx.txt > "${INFO_OUT}/t3.thupg.info" || true
                 ./dc_keti  $HOME_PATH/amgcl_data/thupg4/thupg.G.txt  $HOME_PATH/amgcl_data/thupg4/thupg.u.txt $HOME_PATH/amgcl_data/thupg4/data_outx.txt > "${INFO_OUT}/t4.thupg.info" || true
-                ./dc_keti  $HOME_PATH/amgcl_data/thupg5/thupg.G.txt  $HOME_PATH/amgcl_data/thupg5/thupg.u.txt $HOME_PATH/amgcl_data/thupg5/data_outx.txt > "${INFO_OUT}/t5.thupg.info" || true
-                ./dc_keti  $HOME_PATH/amgcl_data/thupg6/thupg.G.txt  $HOME_PATH/amgcl_data/thupg6/thupg.u.txt $HOME_PATH/amgcl_data/thupg6/data_outx.txt > "${INFO_OUT}/t6.thupg.info" || true
-                ./dc_keti  $HOME_PATH/amgcl_data/thupg7/thupg.G.txt  $HOME_PATH/amgcl_data/thupg7/thupg.u.txt $HOME_PATH/amgcl_data/thupg7/data_outx.txt > "${INFO_OUT}/t7.thupg.info" || true
-                ./dc_keti  $HOME_PATH/amgcl_data/thupg8/thupg.G.txt  $HOME_PATH/amgcl_data/thupg8/thupg.u.txt $HOME_PATH/amgcl_data/thupg8/data_outx.txt > "${INFO_OUT}/t8.thupg.info" || true
+                # ./dc_keti  $HOME_PATH/amgcl_data/thupg5/thupg.G.txt  $HOME_PATH/amgcl_data/thupg5/thupg.u.txt $HOME_PATH/amgcl_data/thupg5/data_outx.txt > "${INFO_OUT}/t5.thupg.info" || true
+                # ./dc_keti  $HOME_PATH/amgcl_data/thupg6/thupg.G.txt  $HOME_PATH/amgcl_data/thupg6/thupg.u.txt $HOME_PATH/amgcl_data/thupg6/data_outx.txt > "${INFO_OUT}/t6.thupg.info" || true
+                # ./dc_keti  $HOME_PATH/amgcl_data/thupg7/thupg.G.txt  $HOME_PATH/amgcl_data/thupg7/thupg.u.txt $HOME_PATH/amgcl_data/thupg7/data_outx.txt > "${INFO_OUT}/t7.thupg.info" || true
+                # ./dc_keti  $HOME_PATH/amgcl_data/thupg8/thupg.G.txt  $HOME_PATH/amgcl_data/thupg8/thupg.u.txt $HOME_PATH/amgcl_data/thupg8/data_outx.txt > "${INFO_OUT}/t8.thupg.info" || true
             ;;
         esac
     ;;
